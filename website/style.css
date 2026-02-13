@@ -131,19 +131,10 @@ body {
 }
 
 .btn-primary-sm {
-    padding: 8px 18px;
+    padding: 8px 16px;
     font-size: 14px;
-    font-weight: 700;
     background: var(--primary);
-    color: #FFFFFF;
-    border-radius: var(--radius-sm);
-    box-shadow: 0 2px 4px rgba(0, 102, 255, 0.1);
-}
-
-.btn-primary-sm:hover {
-    background: var(--primary-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.2);
+    color: #FFFFFF !important;
 }
 
 .btn-secondary {
