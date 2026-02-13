@@ -54,7 +54,7 @@ body {
     border-radius: 50%;
     filter: blur(100px);
     opacity: 0.6;
-    animation: float 15s infinite alternate ease-in-out, colorShift 20s infinite alternate linear;
+    animation: float 15s infinite alternate ease-in-out, colorShift 10s infinite alternate linear;
     will-change: transform, opacity, background;
 }
 
