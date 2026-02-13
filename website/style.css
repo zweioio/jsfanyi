@@ -119,10 +119,18 @@ body {
 }
 
 .nav-links .btn-primary {
-    background: #4F46E5;
-    padding: 8px 16px;
-    border-radius: 8px;
+    background: var(--primary-blue);
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
     color: white !important;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.nav-links .btn-primary:hover {
+    background: #0275D2;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(3, 149, 255, 0.2);
 }
 
 /* Hero Section */
@@ -340,19 +348,25 @@ body {
 
 /* Installation Section */
 .install {
-    padding: 100px 0;
-    background: var(--bg-secondary);
-    color: var(--text-main);
-    border: 1px solid var(--border-color);
-    border-radius: 40px;
-    margin-bottom: 80px;
+    padding: 60px 0 100px;
 }
 
-.install h2 {
+.install-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 60px 40px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.install-card h2 {
     font-size: 40px;
+    font-weight: 800;
     margin-bottom: 48px;
     text-align: center;
     color: var(--text-main);
+    letter-spacing: -0.02em;
 }
 
 .step-list {
