@@ -227,9 +227,13 @@ body {
 }
 
 .section-header h2 {
-    font-size: 36px;
+    font-size: 40px;
     font-weight: 800;
     letter-spacing: -0.02em;
+}
+
+.text-blue {
+    color: #0395FF;
 }
 
 .bento-grid {
