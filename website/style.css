@@ -161,18 +161,6 @@ body {
     color: #FF2D73;
 }
 
-.hero h1 .highlight::after {
-    content: "";
-    position: absolute;
-    bottom: -15px;
-    left: -10%;
-    width: 120%;
-    height: 40px;
-    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='lineGrad' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' style='stop-color:%2386EFAC;stop-opacity:1' /%3E%3Cstop offset='50%25' style='stop-color:%2367E8F9;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%237DD3FC;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M10,30 C100,25 150,25 180,30 C200,35 210,55 185,55 C160,55 160,35 190,30 C250,20 320,25 390,10' stroke='url(%23lineGrad)' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center bottom;
-    background-size: 100% 100%;
-    z-index: -1;
-}
-
 .hero p {
     font-size: 20px;
     color: #666;
