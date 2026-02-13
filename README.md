@@ -18,7 +18,7 @@
 
 ## 安装教程
 
-1. **下载插件**：访问 [展示页面](https://your-username.github.io/TempTranslate/) 点击下载，或直接下载本仓库中的 `website/TempTranslate.zip`。
+1. **下载插件**：访问官网下载，或直接下载本仓库中的 `website/临时翻译.zip`。
 2. **解压文件**：将下载的压缩包解压到本地。
 3. **加载插件**：
    - 打开 Chrome 浏览器，进入 `chrome://extensions/`。
