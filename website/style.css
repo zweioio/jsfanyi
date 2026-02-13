@@ -343,9 +343,7 @@ body {
 
 .install-card:hover {
     transform: translateY(-8px);
-    background: rgba(240, 247, 255, 0.9);
-    border-color: #BFDBFE;
-    box-shadow: 0 20px 40px rgba(3, 149, 255, 0.08);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
 }
 
 .install-card h2 {
