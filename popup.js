@@ -234,13 +234,7 @@ function setInputAndTranslate(text) {
   performTranslation();
 }
 
-chrome.runtime.onMessage.addListener((message) => {
-  if (message && message.type === 'translateText' && message.text) {
-    setInputAndTranslate(message.text);
-  } else if (message && message.type === 'focusInput') {
-    els.inputText.focus();
-  }
-});
+// 去掉与背景/面板的主动消息联动监听
 
 async function getHistory() {
   return new Promise((resolve) => {
