@@ -257,22 +257,24 @@ function renderHistoryItem(item) {
   const wrap = document.createElement('div');
   wrap.style.display = 'flex';
   wrap.style.flexDirection = 'column';
-  wrap.style.gap = '8px';
-  wrap.style.background = '#eef2f6';
-  wrap.style.borderRadius = '16px';
-  wrap.style.padding = '14px 16px';
+  wrap.style.gap = '6px';
+  wrap.style.background = '#ffffff';
+  wrap.style.borderRadius = '12px';
+  wrap.style.padding = '16px';
+  wrap.style.border = '1px solid #F4F6F7';
   const src = document.createElement('div');
-  src.style.color = '#374151';
-  src.style.fontSize = '16px';
-  src.style.lineHeight = '1.6';
-  src.style.fontWeight = '500';
+  src.style.color = '#1d1d1f';
+  src.style.fontSize = '12px';
+  src.style.lineHeight = '1.4';
+  src.style.fontWeight = '400';
   src.style.whiteSpace = 'pre-wrap';
   src.style.wordBreak = 'break-word';
   src.innerText = item.src;
   const out = document.createElement('div');
-  out.style.color = '#8b949e';
-  out.style.fontSize = '14px';
-  out.style.lineHeight = '1.6';
+  out.style.color = '#6b7280';
+  out.style.fontSize = '12px';
+  out.style.lineHeight = '1.4';
+  out.style.fontWeight = '400';
   out.style.whiteSpace = 'pre-wrap';
   out.style.wordBreak = 'break-word';
   out.innerText = item.out;
@@ -296,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
       chrome.storage.local.set({ history: [] }, () => renderHistory());
     });
   }
-  const historyHeader = document.getElementById('historyHeader');
+  const historyHeader = document.getElementById('historyLeft');
   const historyContainer = document.getElementById('historyContainer');
   const toggleIcon = document.getElementById('historyToggleIcon');
   let collapsed = true;
@@ -305,6 +307,12 @@ document.addEventListener('DOMContentLoaded', () => {
       collapsed = !collapsed;
       historyContainer.style.display = collapsed ? 'none' : 'block';
       toggleIcon.style.transform = collapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+    });
+  }
+  const clearBtn = document.getElementById('clearHistory');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
     });
   }
   renderHistory();
