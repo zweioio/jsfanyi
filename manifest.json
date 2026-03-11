@@ -3,7 +3,7 @@
   "name": "即时翻译",
   "version": "1.2",
   "description": "集成 Google、AI 双引擎，翻译双向回译核对，让每一句翻译的准确性都清晰可见",
-  "permissions": ["storage", "clipboardRead", "sidePanel"],
+  "permissions": ["storage", "clipboardRead", "sidePanel", "scripting"],
   "background": {
     "service_worker": "background.js"
   },
@@ -15,18 +15,15 @@
     }
   ],
   "action": {
-    "default_icon": "icons/icon.png"
+    "default_title": "即时翻译"
   },
   "commands": {
     "_execute_action": {
       "suggested_key": {
         "default": "Alt+Q"
       },
-      "description": "打开即时翻译侧边栏"
+      "description": "在网页上打开悬浮窗"
     }
-  },
-  "side_panel": {
-    "default_path": "popup.html"
   },
   "host_permissions": [
     "https://translate.googleapis.com/*",
@@ -38,5 +35,11 @@
     "16": "icons/icon.png",
     "48": "icons/icon.png",
     "128": "icons/icon.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["floating-window.html", "icons/icon.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

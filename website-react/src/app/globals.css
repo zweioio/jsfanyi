@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Aceternity UI Color Scheme */
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --muted: #737373;
+  --muted-foreground: #a3a3a3;
+  --border: #e5e5e5;
+  --ring: #0a0a0a;
+  
+  /* Aceternity UI CSS Variables */
+  --black: #000000;
+  --white: #ffffff;
+  
+  /* Neutral Color Variables */
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #171717;
+  --color-neutral-950: #0a0a0a;
+  
+  /* Gradient Colors */
+  --primary-start: #3b82f6;
+  --primary-end: #8b5cf6;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Ensure glowing effects work properly */
+.group {
+  position: relative;
+}
+
+/* Aceternity UI Gradient Text */
+.bg-gradient-1 {
+  background: linear-gradient(to bottom, var(--primary-start), var(--primary-end));
+}
+
+/* Custom animations for glowing effect */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes badge-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Glowing Effect Styles */
+.glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.glow::after {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--glowingeffect-border-width, 1px));
+  border-radius: inherit;
+  border: var(--glowingeffect-border-width, 1px) solid transparent;
+  background: var(--gradient);
+  background-attachment: fixed;
+  opacity: var(--active, 0);
+  transition: opacity 0.3s;
+  mask-clip: padding-box, border-box;
+  mask-composite: intersect;
+  mask-image: linear-gradient(#0000, #0000), conic-gradient(from calc((var(--start) - var(--spread)) * 1deg), #00000000 0deg, #fff, #00000000 calc(var(--spread) * 2deg));
+}
+
+/* Background Ripple Effect Styles */
+@keyframes cell-ripple {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+.animate-cell-ripple {
+  animation: cell-ripple var(--duration, 200ms) var(--delay, 0ms) ease-out;
+}
+
+.mask-radial-from-20\% {
+  mask-image: radial-gradient(ellipse 80% 50% at 50% 40%, black 10%, transparent 70%);
+}
+
+.mask-radial-at-top {
+  mask-position: 50% 0%;
+  mask-size: 100% 100%;
+}

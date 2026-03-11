@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aceternity UI 发光效果 - 简化版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #fafafa;
+            padding: 40px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #171717;
+        }
+        
+        /* 发光卡片容器 */
+        .card-wrapper {
+            position: relative;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        /* 外层发光边框 */
+        .card-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            padding: 1px;
+            background: linear-gradient(
+                135deg,
+                rgba(163, 163, 163, 0.5) 0%,
+                transparent 25%,
+                transparent 75%,
+                rgba(163, 163, 163, 0.5) 100%
+            );
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        /* 旋转光晕 */
+        .card-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 16px;
+            background: conic-gradient(
+                from calc(var(--start, 0deg) - 60deg),
+                transparent 0deg,
+                rgba(163, 163, 163, 0.8) 60deg,
+                transparent 120deg
+            );
+            opacity: 0;
+            filter: blur(10px);
+            transition: opacity 0.5s;
+            animation: rotate 4s linear infinite;
+        }
+        
+        .card-wrapper:hover::before {
+            opacity: 1;
+        }
+        
+        .card-wrapper:hover::after {
+            opacity: 0.6;
+        }
+        
+        @keyframes rotate {
+            from {
+                --start: 0deg;
+            }
+            to {
+                --start: 360deg;
+            }
+        }
+        
+        /* 内部内容 */
+        .card-content {
+            position: relative;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 32px;
+            z-index: 2;
+        }
+        
+        .card-icon {
+            width: fit-content;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            color: #171717;
+            margin-bottom: 16px;
+        }
+        
+        .card-content h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #171717;
+            margin-bottom: 8px;
+        }
+        
+        .card-content p {
+            font-size: 14px;
+            color: #737373;
+            line-height: 1.6;
+        }
+        
+        /* 推荐徽章 */
+        .card-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #171717;
+            color: #ffffff;
+            padding: 4px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 9999px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+        
+        /* 演示用网格 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        /* Tab 切换组件 */
+        .tabs-container {
+            margin-bottom: 40px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .tab-button {
+            padding: 10px 24px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #737373;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button:hover {
+            color: #171717;
+        }
+        
+        .tab-button.active {
+            background: #ffffff;
+            color: #2563eb;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-panel {
+            display: none;
+        }
+        
+        .tab-panel.active {
+            display: block;
+        }
+        
+        /* 功能介绍布局 */
+        .feature-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .feature-layout.reverse {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .feature-layout.reverse .feature-content {
+            order: 2;
+        }
+        
+        .feature-layout.reverse .feature-demo {
+            order: 1;
+        }
+        
+        .feature-tag {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #2563eb;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .feature-content h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #171717;
+            margin-bottom: 16px;
+        }
+        
+        .feature-desc {
+            font-size: 15px;
+            color: #737373;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #171717;
+            margin-bottom: 12px;
+        }
+        
+        /* 演示框 */
+        .feature-demo {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .demo-box {
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .demo-box.wide {
+            max-width: 500px;
+        }
+        
+        .demo-item {
+            background: #fafafa;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .demo-item.translated {
+            background: #f0f4ff;
+            border-color: #dbe4ff;
+        }
+        
+        .demo-label {
+            font-size: 12px;
+            color: #a3a3a3;
+            margin-bottom: 8px;
+        }
+        
+        .demo-text {
+            font-size: 14px;
+            color: #171717;
+            line-height: 1.6;
+        }
+        
+        .demo-arrow {
+            text-align: center;
+            color: #a3a3a3;
+            font-size: 20px;
+            margin: -8px 0 4px 0;
+        }
+        
+        .demo-text-block {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #171717;
+            margin-bottom: 16px;
+        }
+        
+        .demo-hover-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f4ff;
+            border: 1px solid #dbe4ff;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #171717;
+        }
+        
+        .demo-hover-card svg {
+            flex-shrink: 0;
+        }
+        
+        .demo-hover-text {
+            color: #737373;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        
+        /* 浏览器模拟框 */
+        .browser-mockup {
+            max-width: 450px;
+        }
+        
+        .browser-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        
+        .browser-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .browser-dot.red { background: #ff5f57; }
+        .browser-dot.yellow { background: #febc2e; }
+        .browser-dot.green { background: #28c840; }
+        
+        .browser-url {
+            font-size: 12px;
+            color: #a3a3a3;
+            margin-left: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .feature-layout {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .feature-layout.reverse .feature-content {
+                order: 1;
+            }
+            
+            .feature-layout.reverse .feature-demo {
+                order: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>核心功能介绍</h1>
+        <p style="text-align: center; color: #737373; margin-bottom: 40px; font-size: 16px;">三大核心功能，覆盖你的所有翻译场景</p>
+        
+        <!-- Tab 切换 -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="tab1">功能一</button>
+            <button class="tab-button" data-tab="tab2">功能二</button>
+            <button class="tab-button" data-tab="tab3">功能三</button>
+        </div>
+        
+        <!-- Tab 面板 1：双向回译核对 -->
+        <div class="tab-panel active" id="tab1">
+            <div class="feature-layout">
+                <div class="feature-content">
+                    <div class="feature-tag">功能一</div>
+                    <h2>双向回译核对</h2>
+                    <p class="feature-desc">自动将译文再次译回源语言，通过实时对照确保语义表达精准无误。告别翻译黑盒，让每一次翻译都清晰可信。</p>
+                    <ul class="feature-list">
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            原文、译文、回译三栏对照
+                        </li>
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            语义一致性智能分析
+                        </li>
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            支持中英日韩等主流语言
+                        </li>
+                    </ul>
+                </div>
+                <div class="feature-demo">
+                    <div class="demo-box">
+                        <div class="demo-item">
+                            <div class="demo-label">原文</div>
+                            <div class="demo-text">机器学习是人工智能的核心技术</div>
+                        </div>
+                        <div class="demo-arrow">↓</div>
+                        <div class="demo-item translated">
+                            <div class="demo-label">译文</div>
+                            <div class="demo-text">Machine learning is the core technology of AI</div>
+                        </div>
+                        <div class="demo-arrow">↓</div>
+                        <div class="demo-item">
+                            <div class="demo-label">回译</div>
+                            <div class="demo-text">机器学习是人工智能的核心技术</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 面板 2：网页滑词翻译 -->
+        <div class="tab-panel" id="tab2">
+            <div class="feature-layout reverse">
+                <div class="feature-demo">
+                    <div class="demo-box wide">
+                        <div class="demo-text-block">
+                            Natural language processing (NLP) is a subfield of linguistics, computer science, and artificial intelligence concerned with the interactions between computers and human language.
+                        </div>
+                        <div class="demo-hover-card">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <span>即时翻译</span>
+                            <div class="demo-hover-text">自然语言处理（NLP）是语言学、计算机科学和人工智能的一个子领域，关注计算机与人类语言之间的交互。</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-content">
+                    <div class="feature-tag">功能二</div>
+                    <h2>网页滑词翻译</h2>
+                    <p class="feature-desc">在任意网页中选中想要翻译的文本，翻译结果会自动显示在侧边栏或悬浮窗口中，不干扰阅读体验。</p>
+                    <ul class="feature-list">
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            选中文本即可翻译，无需复制粘贴
+                        </li>
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            智能识别网页语言，自动切换方向
+                        </li>
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            支持专业术语、长段落翻译
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 面板 3：网页对照翻译 -->
+        <div class="tab-panel" id="tab3">
+            <div class="feature-layout">
+                <div class="feature-content">
+                    <div class="feature-tag">功能三</div>
+                    <h2>网页对照翻译</h2>
+                    <p class="feature-desc">一键翻译整个网页内容，支持双语对照显示和仅译文两种模式，阅读外文网站从此畅通无阻。</p>
+                    <ul class="feature-list">
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            原文与译文段落对照显示
+                        </li>
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            一键切换仅译文模式
+                        </li>
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            保留原网页排版和样式
+                        </li>
+                    </ul>
+                </div>
+                <div class="feature-demo">
+                    <div class="demo-box browser-mockup">
+                        <div class="browser-bar">
+                            <span class="browser-dot red"></span>
+                            <span class="browser-dot yellow"></span>
+                            <span class="browser-dot green"></span>
+                            <span class="browser-url">example.com</span>
+                        </div>
+                        <div class="demo-item">
+                            <div class="demo-label">原文</div>
+                            <div class="demo-text">The future of technology is here.</div>
+                        </div>
+                        <div class="demo-item translated">
+                            <div class="demo-label">译文</div>
+                            <div class="demo-text">技术的未来已经到来。</div>
+                        </div>
+                        <div class="demo-item">
+                            <div class="demo-label">原文</div>
+                            <div class="demo-text">Innovation drives progress.</div>
+                        </div>
+                        <div class="demo-item translated">
+                            <div class="demo-label">译文</div>
+                            <div class="demo-text">创新推动进步。</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h1 style="margin-top: 60px;">辅助功能</h1>
+        
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+            <!-- 辅助功能 1：Google 翻译引擎 -->
+            <div class="card-wrapper">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                            <polyline points="2 17 12 22 22 17"/>
+                            <polyline points="2 12 12 17 22 12"/>
+                        </svg>
+                    </div>
+                    <h3>Google 翻译引擎</h3>
+                    <p>集成 Google 翻译 API，支持 100+ 语言实时翻译</p>
+                </div>
+            </div>
+            
+            <!-- 辅助功能 2：双向回译核对 -->
+            <div class="card-wrapper">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 2.1l4 4-4 1.9"/>
+                            <path d="M3 12.2v-2a4 4 0 0 1 4-4h3"/>
+                            <path d="M7 21.8l-4-4 4-1.9"/>
+                            <path d="M21 11.8v2a4 4 0 0 1-4 4h-3"/>
+                        </svg>
+                    </div>
+                    <h3>双向回译核对</h3>
+                    <p>自动将翻译结果回译成源语言，二次比对确保准确性</p>
+                </div>
+            </div>
+            
+            <!-- 辅助功能 3：AI 智能引擎 -->
+            <div class="card-wrapper">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
+                            <path d="M12 2a10 10 0 0 1 10 10"/>
+                            <path d="M12 12 2.1 12"/>
+                        </svg>
+                    </div>
+                    <h3>AI 智能引擎</h3>
+                    <p>支持 OpenAI、Gemini 等 AI 模型，提供更地道的翻译</p>
+                </div>
+            </div>
+            
+            <!-- 辅助功能 4：侧边栏模式 -->
+            <div class="card-wrapper">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="9" y1="3" x2="9" y2="21"/>
+                        </svg>
+                    </div>
+                    <h3>侧边栏模式</h3>
+                    <p>不干扰当前浏览，随时调用翻译功能</p>
+                </div>
+            </div>
+            
+            <!-- 辅助功能 5：语音朗读 -->
+            <div class="card-wrapper">
+                <div class="card-content">
+                    <div class="card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                    </div>
+                    <h3>语音朗读</h3>
+                    <p>支持文本转语音，提供自然的发音示范</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Tab 切换功能
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // 移除所有激活状态
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+                
+                // 添加激活状态
+                button.classList.add('active');
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // 简单的鼠标跟踪（可选）
+        document.querySelectorAll('.card-wrapper').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                // 可以在这里添加更复杂的效果
+                console.log('鼠标位置:', x, y);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
-chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
+// 移除侧边栏配置，使用 popup 模式
+// chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
 
 // Edge Token Cache
 let edgeToken = '';
@@ -161,6 +162,26 @@ async function fetchEdgeBatch(items, from, to) {
   return null;
 }
 
+// 监听扩展图标点击或快捷键，直接在网页上创建悬浮窗
+chrome.action.onClicked.addListener((tab) => {
+  console.log('Extension icon clicked, tab:', tab);
+  // 注入 content script（如果尚未注入）
+  chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    files: ['content.js']
+  }, (results) => {
+    console.log('Script injected results:', results);
+    // 然后发送消息创建悬浮窗
+    setTimeout(() => {
+      chrome.tabs.sendMessage(tab.id, { type: 'jt_open_floating_panel' }).then((response) => {
+        console.log('Message sent successfully, response:', response);
+      }).catch((error) => {
+        console.error('Error sending message:', error);
+      });
+    }, 100);
+  });
+});
+
 // 消息监听
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg && msg.type === 'jt_translate_batch') {
@@ -180,6 +201,56 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       const out = await translateService(items, from, to, engine);
       sendResponse({ text: out['single'] || '' });
     })();
+    return true;
+  }
+
+  // 监听侧边栏打开，主动注入 content script (如果尚未注入)
+  if (msg && msg.type === 'jt_panel_opened') {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0] && tabs[0].id) {
+        chrome.scripting.executeScript({
+          target: { tabId: tabs[0].id },
+          files: ['content.js']
+        }).catch(() => {
+          // Ignore error (e.g. script already exists or restricted page)
+        });
+      }
+    });
+  }
+  
+  // 监听宽度变化消息，转发给 content script
+  if (msg && msg.type === 'jt_width_changed') {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0] && tabs[0].id) {
+        chrome.tabs.sendMessage(tabs[0].id, msg).catch(() => {});
+      }
+    });
+    sendResponse({});
+    return true;
+  }
+  
+  // 监听打开悬浮窗的消息
+  if (msg && msg.type === 'jt_open_floating_panel') {
+    // 保存悬浮窗打开状态
+    chrome.storage.local.set({ floatingPanelOpen: true });
+    
+    // 通知当前 tab 的 content script 创建悬浮窗
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0] && tabs[0].id) {
+        // 先确保 content script 已注入
+        chrome.scripting.executeScript({
+          target: { tabId: tabs[0].id },
+          files: ['content.js']
+        }).catch(() => {});
+        
+        // 然后发送消息
+        setTimeout(() => {
+          chrome.tabs.sendMessage(tabs[0].id, msg).catch(() => {});
+        }, 200);
+      }
+    });
+    
+    sendResponse({ success: true });
     return true;
   }
 });

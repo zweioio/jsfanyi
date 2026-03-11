@@ -4,25 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>即时翻译 - 集成 Google、AI 双引擎，翻译双向回译核对</title>
-    <link rel="icon" type="image/png" href="assets/logo.png?v=20260216">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/logo.png?v=20260216">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/logo.png?v=20260216">
-    <link rel="shortcut icon" type="image/png" href="assets/logo.png?v=20260216">
-    <link rel="apple-touch-icon" href="assets/logo.png?v=20260216">
-    <link rel="stylesheet" href="style.css?v=20260216">
+    <link rel="icon" type="image/png" href="assets/logo.png?v=20260310">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/logo.png?v=20260310">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/logo.png?v=20260310">
+    <link rel="shortcut icon" type="image/png" href="assets/logo.png?v=20260310">
+    <link rel="apple-touch-icon" href="assets/logo.png?v=20260310">
+    <link rel="stylesheet" href="style.css?v=20260310">
 </head>
 <body>
-    <div class="bg-decoration">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-2"></div>
-        <div class="glow-orb orb-3"></div>
-    </div>
+    <!-- Background Grid -->
+    <div class="bg-grid"></div>
+    
+    <!-- Background Gradient Orbs -->
+    <div class="bg-gradient-orb orb-1"></div>
+    <div class="bg-gradient-orb orb-2"></div>
+    <div class="bg-gradient-orb orb-3"></div>
 
     <!-- Navbar -->
     <nav class="navbar">
         <div class="container">
             <div class="logo">
                 <img src="assets/logo_web.svg" alt="即时翻译 Logo">
+                <span>即时翻译</span>
             </div>
             <div class="nav-links">
                 <a href="#features">核心功能</a>
@@ -36,15 +39,31 @@
     <!-- Hero Section -->
     <header class="hero">
         <div class="container">
-            <div class="badge">支持 Chrome / Edge 浏览器</div>
-            <h1>集成 Google & AI 双引擎<br><span class="highlight">让翻译准确性清晰可见</span></h1>
-            <p>双向回译核对技术，自动将结果译回源语言，通过“二次比对”助您直观判断语义，确保沟通万无一失。</p>
-            <div class="cta-group">
-                <a href="即时翻译 - 集成 Google、AI 双引擎，翻译双向回译核对，让每一句翻译的准确性都清晰可见.zip" download class="btn btn-primary">下载浏览器插件</a>
+            <div class="hero-badge fade-in-up">支持 Chrome / Edge 浏览器</div>
+            <h1 class="hero-title fade-in-up" style="animation-delay: 0.1s;">
+                集成 Google & AI 双引擎
+                <span class="gradient-text">让翻译准确性清晰可见</span>
+            </h1>
+            <p class="hero-description fade-in-up" style="animation-delay: 0.2s;">
+                双向回译核对技术，自动将结果译回源语言，通过"二次比对"助您直观判断语义，确保沟通万无一失。
+            </p>
+            <div class="cta-group fade-in-up" style="animation-delay: 0.3s;">
+                <a href="即时翻译 - 集成 Google、AI 双引擎，翻译双向回译核对，让每一句翻译的准确性都清晰可见.zip" download class="btn btn-primary">
+                    <span>下载浏览器插件</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </a>
                 <a href="#features" class="btn btn-secondary">了解核心功能</a>
             </div>
-            <div class="hero-footer">
-                v1.2 | 开源且安全 | 100% 隐私保护
+            <div class="hero-footer fade-in-up" style="animation-delay: 0.4s;">
+                <span>v1.2</span>
+                <span class="divider">•</span>
+                <span>开源且安全</span>
+                <span class="divider">•</span>
+                <span>100% 隐私保护</span>
             </div>
         </div>
     </header>
@@ -52,48 +71,48 @@
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="container">
-            <div class="section-header">
-                <h2>六大核心功能</h2>
-                <p>深度整合 AI 能力，为您提供最专业的翻译工作流</p>
+            <div class="section-header" data-animate="fade-in-up">
+                <h2 class="section-title">六大核心功能</h2>
+                <p class="section-subtitle">深度整合 AI 能力，为您提供最专业的翻译工作流</p>
             </div>
             <div class="features-grid">
-                <div class="feature-card">
-                    <div class="icon-box">
+                <div class="feature-card" data-animate="fade-in-up" data-delay="0">
+                    <div class="feature-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
                     </div>
                     <h3>双向回译核对</h3>
                     <p>自动将译文再次译回源语言，通过实时对照确保语义表达精准无误。</p>
                 </div>
-                <div class="feature-card">
-                    <div class="icon-box">
+                <div class="feature-card" data-animate="fade-in-up" data-delay="0.1">
+                    <div class="feature-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
                     </div>
                     <h3>AI 智能双引擎</h3>
                     <p>结合 Google 翻译的稳定与 AI 模型（GPT/Gemini）的语境理解能力。</p>
                 </div>
-                <div class="feature-card">
-                    <div class="icon-box">
+                <div class="feature-card" data-animate="fade-in-up" data-delay="0.2">
+                    <div class="feature-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
                     </div>
                     <h3>侧边栏即点即译</h3>
                     <p>深度适配 Chrome Side Panel，在侧边栏即可完成翻译，无需切换标签页。</p>
                 </div>
-                <div class="feature-card">
-                    <div class="icon-box">
+                <div class="feature-card" data-animate="fade-in-up" data-delay="0.3">
+                    <div class="feature-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
                     </div>
                     <h3>一键智能粘贴</h3>
                     <p>自动识别剪贴板内容，支持一键粘贴并触发翻译，大幅提升操作效率。</p>
                 </div>
-                <div class="feature-card">
-                    <div class="icon-box">
+                <div class="feature-card" data-animate="fade-in-up" data-delay="0.4">
+                    <div class="feature-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
                     </div>
                     <h3>实时语音朗读</h3>
                     <p>支持多国语言的高质量语音合成，集成了智能停止与重读控制功能。</p>
                 </div>
-                <div class="feature-card">
-                    <div class="icon-box">
+                <div class="feature-card" data-animate="fade-in-up" data-delay="0.5">
+                    <div class="feature-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
                     </div>
                     <h3>本地隐私优先</h3>
@@ -106,36 +125,77 @@
     <!-- Pricing Section -->
     <section id="pricing" class="pricing">
         <div class="container">
-            <div class="section-header">
-                <h2>选择适合您的方案</h2>
-                <p>免费使用所有基础功能，解锁更强大的 AI 体验</p>
+            <div class="section-header" data-animate="fade-in-up">
+                <h2 class="section-title">选择适合您的方案</h2>
+                <p class="section-subtitle">免费使用所有基础功能，解锁更强大的 AI 体验</p>
             </div>
             <div class="pricing-grid">
-                <div class="pricing-card featured">
+                <div class="pricing-card featured" data-animate="fade-in-scale" data-delay="0">
+                    <div class="card-badge">⭐ 推荐</div>
                     <div class="card-header">
                         <h3>免费版</h3>
                         <div class="price">$0 <span>/ 永久免费</span></div>
                     </div>
                     <ul class="price-features">
-                        <li><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg> Google 翻译引擎</li>
-                        <li><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg> 双向回译核对</li>
-                        <li><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg> 侧边栏模式</li>
-                        <li><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg> 基础语音朗读</li>
+                        <li>
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Google 翻译引擎
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            双向回译核对
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            侧边栏模式
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            基础语音朗读
+                        </li>
                     </ul>
-                    <a href="即时翻译 - 集成 Google、AI 双引擎，翻译双向回译核对，让每一句翻译的准确性都清晰可见.zip" download class="btn btn-primary btn-flat">立即开始使用</a>
+                    <a href="即时翻译 - 集成 Google、AI 双引擎，翻译双向回译核对，让每一句翻译的准确性都清晰可见.zip" download class="btn btn-primary btn-block">立即开始使用</a>
                 </div>
-                <div class="pricing-card">
+                <div class="pricing-card" data-animate="fade-in-scale" data-delay="0.15">
                     <div class="card-header">
                         <h3>专业版</h3>
                         <div class="price">敬请期待 <span>/ 按需配置</span></div>
                     </div>
                     <ul class="price-features">
-                        <li><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg> 集成 OpenAI / Gemini</li>
-                        <li><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg> 智能上下文理解</li>
-                        <li><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg> 自定义 API Key 支持</li>
-                        <li><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg> 优先技术支持</li>
+                        <li>
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            集成 OpenAI / Gemini
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            智能上下文理解
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            自定义 API Key 支持
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="3" fill="none">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            优先技术支持
+                        </li>
                     </ul>
-                    <a href="javascript:void(0)" class="btn btn-outline">敬请期待</a>
+                    <a href="javascript:void(0)" class="btn btn-outline btn-block">敬请期待</a>
                 </div>
             </div>
         </div>
@@ -144,25 +204,25 @@
     <!-- Installation Section -->
     <section id="install" class="install">
         <div class="container">
-            <div class="section-header">
-                <h2>只需三步，立即开启</h2>
-                <p>简单几步配置，即可在浏览器中享受最精准的翻译体验</p>
+            <div class="section-header" data-animate="fade-in-up">
+                <h2 class="section-title">只需三步，立即开启</h2>
+                <p class="section-subtitle">简单几步配置，即可在浏览器中享受最精准的翻译体验</p>
             </div>
             <div class="steps-container">
-                <div class="step-card">
-                    <div class="step-num">01</div>
+                <div class="step-card" data-animate="fade-in-up" data-delay="0">
+                    <div class="step-number">01</div>
                     <h4>下载并解压</h4>
                     <p>点击上方下载按钮获取插件包，并解压到您容易找到的本地文件夹中。</p>
                 </div>
-                <div class="step-card">
-                    <div class="step-num">02</div>
+                <div class="step-card" data-animate="fade-in-up" data-delay="0.15">
+                    <div class="step-number">02</div>
                     <h4>开启开发者模式</h4>
-                    <p>打开 Chrome 浏览器，进入 <code>chrome://extensions/</code> 并开启右上角的“开发者模式”。</p>
+                    <p>打开 Chrome 浏览器，进入 <code>chrome://extensions/</code> 并开启右上角的"开发者模式"。</p>
                 </div>
-                <div class="step-card">
-                    <div class="step-num">03</div>
+                <div class="step-card" data-animate="fade-in-up" data-delay="0.3">
+                    <div class="step-number">03</div>
                     <h4>加载并使用</h4>
-                    <p>点击“加载已解压的扩展程序”，选择解压后的文件夹。点击侧边栏图标即可开始翻译。</p>
+                    <p>点击"加载已解压的扩展程序"，选择解压后的文件夹。点击侧边栏图标即可开始翻译。</p>
                 </div>
             </div>
         </div>
@@ -171,19 +231,19 @@
     <!-- FAQ Section -->
     <section class="faq">
         <div class="container">
-            <div class="section-header">
-                <h2>常见问题</h2>
+            <div class="section-header" data-animate="fade-in-up">
+                <h2 class="section-title">常见问题</h2>
             </div>
             <div class="faq-list">
-                <div class="faq-item">
+                <div class="faq-item" data-animate="fade-in-up" data-delay="0">
                     <h4>插件支持哪些浏览器？</h4>
                     <p>目前深度适配 Google Chrome 和 Microsoft Edge 浏览器，理论上支持所有基于 Chromium 内核的浏览器。</p>
                 </div>
-                <div class="faq-item">
+                <div class="faq-item" data-animate="fade-in-up" data-delay="0.1">
                     <h4>如何配置 AI 智能引擎？</h4>
                     <p>当前自定义 API Key 配置功能仍在完善中，敬请期待。同时，我们已提供无需填写个人 API Key 的内置 AI 智能引擎，可直接使用。</p>
                 </div>
-                <div class="faq-item">
+                <div class="faq-item" data-animate="fade-in-up" data-delay="0.2">
                     <h4>翻译数据会上传吗？</h4>
                     <p>不会。我们非常重视您的隐私，所有翻译请求均直接发送至对应的翻译引擎 API，插件本身不存储任何内容。</p>
                 </div>
@@ -194,14 +254,84 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="footer-logo">
-                <img src="assets/logo_web.svg" alt="logo">
-            </div>
-            <p>集成 Google、AI 双引擎，让翻译结果更透明、更准确。</p>
-            <div class="footer-bottom">
-                &copy; 2026 即时翻译
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="assets/logo_web.svg" alt="logo">
+                    <span>即时翻译</span>
+                </div>
+                <p>集成 Google、AI 双引擎，让翻译结果更透明、更准确。</p>
+                <div class="footer-bottom">
+                    &copy; 2026 即时翻译
+                </div>
             </div>
         </div>
     </footer>
+
+    <script>
+        // Scroll Animation Observer
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const element = entry.target;
+                    const animation = element.getAttribute('data-animate');
+                    const delay = element.getAttribute('data-delay') || 0;
+                    
+                    setTimeout(() => {
+                        element.classList.add(animation);
+                        element.style.opacity = '1';
+                    }, delay * 1000);
+                    
+                    observer.unobserve(element);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('[data-animate]').forEach(el => {
+            el.style.opacity = '0';
+            observer.observe(el);
+        });
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Navbar Scroll Effect
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+            lastScrollY = window.scrollY;
+        });
+
+        // Mouse Move Effect for Cards
+        document.querySelectorAll('.feature-card, .pricing-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
 </body>
 </html>
