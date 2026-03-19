@@ -230,6 +230,8 @@
       position: relative;
       transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
       border: 1px solid transparent;
+      display: flex;
+      flex-direction: column;
     }
     .input-container:hover { background: #eef2f6; }
     .input-container:focus-within {
@@ -240,24 +242,24 @@
 
     /* (Revert to native select; remove custom dropdown styles) */
 
-    .input-header {
+    .input-placeholder-layer {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      color: var(--text-gray);
+      font-size: 14px;
+      line-height: 1.4;
+      pointer-events: none;
       display: flex;
       align-items: center;
       gap: 4px;
-      font-size: 16px;
-      color: var(--text-gray);
-      margin-bottom: 12px;
     }
-
-    .paste-btn {
+    
+    .input-placeholder-layer span {
+      pointer-events: auto;
+      display: inline-block;
       color: var(--primary-blue);
-      border: 1px solid var(--primary-blue);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 16px;
       cursor: pointer;
-      background: var(--white);
-      font-weight: 400;
     }
 
     textarea {
@@ -267,7 +269,7 @@
       max-height: 240px;
       border: none;
       background: transparent;
-      font-size: 16px;
+      font-size: 14px;
       line-height: 1.4;
       resize: none;
       outline: none;
@@ -280,7 +282,9 @@
     .input-footer {
       display: flex;
       justify-content: flex-end;
-      margin-top: 8px;
+      align-items: center;
+      gap: 12px;
+      margin-top: auto; /* Push to bottom */
     }
 
     .translate-btn {
@@ -357,11 +361,8 @@
     }
 
     .output-text {
-      font-size: 16px;
-      line-height: 1.5;
-      margin-bottom: 8px;
-      color: var(--text-gray);
-      font-family: inherit;
+      font-size: 14px; /* 修改为 14 */
+      /* ... */
     }
 
     .back-translation {
@@ -520,11 +521,18 @@
       line-height: 1;
       cursor: pointer;
       user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .jt-dd-item:hover { background: #f4f6f8; }
     .jt-dd-item.active {
       background: #edf6ff;
       color: var(--primary-blue);
+    }
+    /* 移除语言选择下拉框的对勾图标 */
+    .jt-dd-item svg {
+      display: none !important;
     }
     
     .hidden { display: none; }
@@ -532,35 +540,24 @@
 </head>
 <body>
   <!-- Header -->
-  <div class="header">
+  <div class="header" style="display: none;">
     <div class="header-controls">
       <!-- 拖拽图标 -->
-      <div class="drag-handle" id="dragHandle" title="拖拽">
+      <div class="drag-handle" id="dragHandle" title="拖拽" style="display: none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
           <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
         </svg>
       </div>
       <div class="brand">
-         <img src="icons/icon.png" alt="logo">
-         即时翻译
+         <img src="icons/logo_extension.png" alt="logo" style="width: auto; height: 20px;">
+         <!-- 即时翻译 -->
        </div>
     </div>
     <div class="header-controls">
-      <!-- 引擎选择下拉框 -->
-      <div class="engine-selector">
-        <select class="engine-select" id="engineSelect">
-          <option value="google">谷歌翻译引擎</option>
-          <option value="ai">AI 智能引擎</option>
-        </select>
-      </div>
-      <!-- 宽度调整按钮 -->
-      <button class="width-adjust-btn" id="widthAdjustBtn" title="调整宽度">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 14h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
-          <line x1="12" y1="3" x2="12" y2="21"/>
-        </svg>
-      </button>
+      <!-- 引擎选择下拉框已移至 content.js Header -->
+      
+      <!-- 宽度调整按钮已移至 content.js Header -->
     </div>
   </div>
   
@@ -619,21 +616,22 @@
     
     /* Quick Translate Area */
     .quick-trans-box {
-      background: #F9FAFB;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
+      background: var(--bg-light);
+      border-radius: var(--border-radius);
       padding: 12px;
-      margin-top: 16px;
-      min-height: 100px;
+      margin-bottom: 12px; /* 和文本翻译结果间距一致 */
+      min-height: 120px; /* 和文本翻译结果高度一致 */
+      position: relative;
+      border: 1px solid transparent; /* 保持一致的边框逻辑 */
     }
-    .quick-trans-title {
-      font-size: 13px;
-      font-weight: 500;
-      color: #374151;
-      margin-bottom: 8px;
+    
+    .section-title {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      font-size: 14px;
+      color: #202224;
+      margin: 16px 0 8px 0; /* 统一间距 */
     }
     .quick-trans-content {
       font-size: 14px;
@@ -648,26 +646,29 @@
     }
   </style>
   
-  <div style="border-top:1px solid #E9EAEB; margin: 0 0 16px 0;"></div>
 
-  <!-- Mode Tabs -->
-  <div class="mode-tabs">
-    <div class="mode-tab active" data-tab="text">文本翻译</div>
-    <div class="mode-tab" data-tab="contrast">网页滑词翻译</div>
-    <div class="mode-tab" data-tab="web">网页对照翻译</div>
-  </div>
-
-  <!-- Tab: Webpage Contrast Translation (Previous "Web" mode, now split) -->
-  <div id="tab-contrast" class="tab-content">
-    <!-- Language Selector (Contrast Mode) -->
-    <div class="lang-row">
-      <div class="lang-box" id="contrastFromBox">
+    <!-- Global Language Selector -->
+    <div class="lang-row" style="margin-bottom: 12px;">
+      <div class="lang-box" id="sourceLangBox">
         <div class="lang-label">
-          <select id="contrastFromLang">
+          <select id="sourceLangSelect">
             <option value="zh">中文（简体）</option>
-            <option value="en">英文</option>
+            <option value="en">英语</option>
+            <option value="ja">日语</option>
+            <option value="ko">韩语</option>
+            <option value="fr">法语</option>
+            <option value="de">德语</option>
+            <option value="es">西班牙语</option>
+            <option value="ru">俄语</option>
+            <option value="ar">阿拉伯语</option>
+            <option value="pt">葡萄牙语</option>
+            <option value="it">意大利语</option>
+            <option value="nl">荷兰语</option>
+            <option value="th">泰语</option>
+            <option value="vi">越南语</option>
+            <option value="id">印尼语</option>
           </select>
-          <span id="contrastFromLabel">中文（简体）</span>
+          <span id="sourceLangLabel">中文（简体）</span>
           <span class="lang-arrow">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -677,17 +678,30 @@
         <div class="lang-sub">翻译语言</div>
       </div>
       
-      <div class="swap-icon" id="contrastSwapBtn">
+      <div class="swap-icon" id="swapLangBtn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
       </div>
   
-      <div class="lang-box" id="contrastToBox">
+      <div class="lang-box" id="targetLangBox">
         <div class="lang-label">
-          <select id="contrastToLang">
+          <select id="targetLangSelect">
             <option value="zh">中文（简体）</option>
-            <option value="en">英文</option>
+            <option value="en">英语</option>
+            <option value="ja">日语</option>
+            <option value="ko">韩语</option>
+            <option value="fr">法语</option>
+            <option value="de">德语</option>
+            <option value="es">西班牙语</option>
+            <option value="ru">俄语</option>
+            <option value="ar">阿拉伯语</option>
+            <option value="pt">葡萄牙语</option>
+            <option value="it">意大利语</option>
+            <option value="nl">荷兰语</option>
+            <option value="th">泰语</option>
+            <option value="vi">越南语</option>
+            <option value="id">印尼语</option>
           </select>
-          <span id="contrastToLabel">中文（简体）</span>
+          <span id="targetLangLabel">中文（简体）</span>
           <span class="lang-arrow">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -697,13 +711,24 @@
         <div class="lang-sub">目标语言</div>
       </div>
     </div>
+
+    <!-- Mode Tabs -->
+    <div class="mode-tabs" style="margin-bottom: 12px;">
+      <div class="mode-tab active" data-tab="text">文本翻译</div>
+      <div class="mode-tab" data-tab="contrast">网页滑词翻译</div>
+      <div class="mode-tab" data-tab="web">网页对照翻译</div>
+    </div>
+
+
+
+  <div id="tab-contrast" class="tab-content">
+    <!-- Language Selector (Contrast Mode) - REMOVED -->
     
-    <!-- Quick Translation Area (Moved here) -->
+    <!-- Quick Translation Area (Moved here, now on bottom) -->
     <div class="section-title" style="display:flex;align-items:center;gap:8px;font-size:14px;color:#202224;margin:16px 0 8px 0;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
       <span>快捷翻译</span>
     </div>
-    <div class="quick-trans-box">
+    <div class="quick-trans-box" style="margin-bottom: 16px;">
       <div class="quick-trans-content" id="quickTransResult">
         <div class="quick-trans-placeholder">
           在网页上选中文字，此处即显示翻译
@@ -714,47 +739,8 @@
 
   <!-- Tab: Webpage Bilingual Translation (New separate tab) -->
   <div id="tab-web" class="tab-content">
-    <!-- Language Selector (Web Bilingual Mode) -->
-    <div class="lang-row">
-      <div class="lang-box" id="webFromBox">
-        <div class="lang-label">
-          <select id="webFromLang">
-            <option value="zh">中文（简体）</option>
-            <option value="en">英文</option>
-          </select>
-          <span id="webFromLabel">中文（简体）</span>
-          <span class="lang-arrow">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-        </div>
-        <div class="lang-sub">翻译语言</div>
-      </div>
-      
-      <div class="swap-icon" id="webSwapBtn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
-      </div>
-  
-      <div class="lang-box" id="webToBox">
-        <div class="lang-label">
-          <select id="webToLang">
-            <option value="zh">中文（简体）</option>
-            <option value="en">英文</option>
-          </select>
-          <span id="webToLabel">中文（简体）</span>
-          <span class="lang-arrow">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </span>
-        </div>
-        <div class="lang-sub">目标语言</div>
-      </div>
-    </div>
-
-    <!-- Contrast Translation Controls -->
-    <div class="row-flex">
+    <!-- Contrast Translation Controls (Moved up) -->
+    <div class="row-flex" style="margin-top: 0; margin-bottom: 16px;">
       <div style="font-size:14px;color:#202224;display:flex;align-items:center;gap:4px;">
         <span>网页对照翻译</span>
         <span class="beta-pill">Beta</span>
@@ -768,7 +754,7 @@
       </div>
     </div>
     
-    <div id="modeSegment" style="display:flex;background:#f3f4f6;border-radius:12px;padding:4px;gap:4px;width:100%;">
+    <div id="modeSegment" style="display:flex;background:#f3f4f6;border-radius:12px;padding:4px;gap:4px;width:100%;margin-bottom:16px;">
       <div id="segBilingual" class="seg">
         <svg class="seg-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M15 4H18C19.1046 4 20 4.89543 20 6V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -794,65 +780,37 @@
         <span>仅查看译文</span>
       </div>
     </div>
+
+    <!-- Language Selector (Web Bilingual Mode) - REMOVED -->
+
+    <!-- Contrast Translation Controls (Removed from here) -->
   </div>
 
   <!-- Tab: Text Translation -->
+  <!-- Tab: Text Translation -->
   <div id="tab-text" class="tab-content active">
-    <!-- Lang Selector (Text Mode - Existing) -->
-    <div class="lang-row">
-    <div class="lang-box" id="fromBox">
-      <div class="lang-label">
-        <select id="fromLang">
-          <option value="zh">中文（简体）</option>
-          <option value="en">英文</option>
-        </select>
-        <span id="fromLabel">中文（简体）</span>
-        <span class="lang-arrow">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-      </div>
-      <div class="lang-sub">翻译语言</div>
-    </div>
+    <!-- Section Title -->
+    <div class="section-title" style="display:flex;align-items:center;gap:8px;font-size:14px;color:#202224;margin:0 0 8px 0;"><span>文本翻译</span></div>
     
-    <div class="swap-icon" id="swapBtn">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
-    </div>
-
-    <div class="lang-box" id="toBox">
-      <div class="lang-label">
-        <select id="toLang">
-          <option value="zh">中文（简体）</option>
-          <option value="en">英文</option>
-        </select>
-        <span id="toLabel">中文（简体）</span>
-        <span class="lang-arrow">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
+    <!-- Input Area (Moved down) -->
+    <div class="input-container">
+      <div class="input-placeholder-layer" id="placeholderLayer" style="position: absolute; top: 12px; left: 12px; color: var(--text-gray); font-size: 14px; line-height: 1.4; pointer-events: none; display: flex; align-items: center; gap: 4px;">
+        输入或 <span id="pasteBtnReal" style="pointer-events: auto; display: inline-block; color: var(--primary-blue); cursor: pointer;">点击粘贴</span> 需要翻译的文本
       </div>
-      <div class="lang-sub">目标语言</div>
+      <textarea id="inputText"></textarea>
+        <div class="input-footer" style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: auto;">
+        <button class="clear-btn hidden" id="clearInput">清空</button>
+        <button class="translate-btn" id="translateBtn" disabled>
+          <div class="spinner"></div>
+          <span>翻译</span>
+          <img src="icons/enter.svg" width="16" height="16" style="margin-left: 0px;">
+        </button>
+      </div>
     </div>
-  </div>
 
-  <div class="section-title" style="display:flex;align-items:center;gap:8px;font-size:14px;color:#202224;margin:0 0 8px 0;"><span>文本翻译</span></div>
-  <!-- Input Area -->
-  <div class="input-container">
-    <div class="input-placeholder-layer" id="placeholderLayer" style="position: absolute; top: 12px; left: 12px; color: var(--text-gray); font-size: 16px; line-height: 1.4; pointer-events: none; display: flex; align-items: center; gap: 4px;">
-      输入或 <span id="pasteBtnReal" style="pointer-events: auto; display: inline-block; color: var(--primary-blue); cursor: pointer;">点击粘贴</span> 需要翻译的文本
-    </div>
-    <textarea id="inputText"></textarea>
-      <div class="input-footer" style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 12px;">
-      <button class="clear-btn hidden" id="clearInput">清空</button>
-      <button class="translate-btn" id="translateBtn" disabled>
-        <div class="spinner"></div>
-        <span>翻译</span>
-        <img src="icons/enter.svg" width="16" height="16" style="margin-left: 0px;">
-      </button>
-    </div>
-  </div>
+    <!-- Lang Selector removed from here -->
+
+    <!-- Input Area (Moved down) - REMOVED -->
 
   <!-- Output Area -->
   <div class="output-title">翻译结果</div>

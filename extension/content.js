@@ -265,320 +265,466 @@
     }
   }, 300));
 
-  // ===================================
-  // 悬浮窗功能
-  // ===================================
-  
-  let floatingPanel = null;
-  let isPanelDragging = false;
-  let panelDragOffset = { x: 0, y: 0 };
-  
-  // 创建悬浮窗
-  function createFloatingPanel() {
-    if (floatingPanel) return;
-    
-    // 创建悬浮窗容器
-    floatingPanel = document.createElement('div');
-    floatingPanel.id = 'jt-floating-panel';
-    floatingPanel.style.cssText = `
-      position: fixed;
-      z-index: 2147483647;
-      top: 100px;
-      right: 100px;
-      width: 320px;
-      min-width: 280px;
-      max-width: 80vw;
-      background: #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e5e7eb;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      transition: width 0.3s ease;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    `;
-    
-    // 加载保存的位置
-    chrome.storage.local.get(['panelX', 'panelY', 'widthState'], (res) => {
-      if (res.panelX && res.panelY) {
-        floatingPanel.style.left = res.panelX + 'px';
-        floatingPanel.style.top = res.panelY + 'px';
-        floatingPanel.style.right = 'auto';
-      }
-      
-      // 应用宽度状态
-      if (res.widthState) {
-        applyWidthState(res.widthState);
-      }
-    });
-    
-    // 创建 header（拖拽区域）
-    const header = document.createElement('div');
-    header.style.cssText = `
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      background: #f9fafb;
-      border-bottom: 1px solid #e5e7eb;
-      cursor: grab;
-      user-select: none;
-      height: 44px;
-    `;
-    
-    // 左侧：Logo 和拖拽手柄
-    const leftSection = document.createElement('div');
-    leftSection.style.cssText = `
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    `;
-    
-    // 拖拽手柄
-    const dragHandle = document.createElement('div');
-    dragHandle.style.cssText = `
-      width: 20px;
-      height: 20px;
-      cursor: grab;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #9ca3af;
-      user-select: none;
-    `;
-    dragHandle.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>`;
-    
-    // Logo 和品牌名称
-    const brand = document.createElement('div');
-    brand.style.cssText = `
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #1d1d1f;
-    `;
-    brand.innerHTML = `<img src="${chrome.runtime.getURL('icons/icon.png')}" style="width:18px;height:18px;" alt="logo"><span>即时翻译</span>`;
-    
-    leftSection.appendChild(dragHandle);
-    leftSection.appendChild(brand);
-    
-    // 右侧：控制按钮
-    const rightSection = document.createElement('div');
-    rightSection.style.cssText = `
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    `;
-    
-    // 引擎选择下拉框
-    const engineSelect = document.createElement('select');
-    engineSelect.style.cssText = `
-      padding: 4px 8px;
-      font-size: 12px;
-      color: #6b7280;
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      cursor: pointer;
-      outline: none;
-      height: 28px;
-    `;
-    engineSelect.innerHTML = `
-      <option value="google">谷歌翻译</option>
-      <option value="ai">AI 引擎</option>
-    `;
-    
-    // 加载当前引擎
-    chrome.storage.sync.get(['engine'], (res) => {
-      if (res.engine) engineSelect.value = res.engine;
-    });
-    
-    engineSelect.addEventListener('change', (e) => {
-      chrome.storage.sync.set({ engine: e.target.value });
-    });
-    
-    // 宽度调整按钮
-    const widthBtn = document.createElement('button');
-    widthBtn.title = '调整宽度';
-    widthBtn.style.cssText = `
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      color: #6b7280;
-      padding: 0;
-      border-radius: 6px;
-    `;
-    widthBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 14h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/><line x1="12" y1="3" x2="12" y2="21"/></svg>';
-    
-    let currentWidthIdx = 0;
-    const widthOptions = ['default', 'half', 'third'];
-    
-    widthBtn.addEventListener('click', () => {
-      currentWidthIdx = (currentWidthIdx + 1) % widthOptions.length;
-      const newState = widthOptions[currentWidthIdx];
-      applyWidthState(newState);
-      chrome.storage.local.set({ widthState: newState });
-    });
-    
-    // 关闭按钮
-    const closeBtn = document.createElement('button');
-    closeBtn.title = '关闭';
-    closeBtn.style.cssText = `
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      color: #6b7280;
-      padding: 0;
-      border-radius: 6px;
-    `;
-    closeBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-    closeBtn.addEventListener('click', () => {
-      floatingPanel?.remove();
-      floatingPanel = null;
-      chrome.storage.local.set({ floatingPanelOpen: false });
-    });
-    
-    rightSection.appendChild(engineSelect);
-    rightSection.appendChild(widthBtn);
-    rightSection.appendChild(closeBtn);
-    
-    header.appendChild(leftSection);
-    header.appendChild(rightSection);
-    
-    // 创建内容区域（使用 iframe 加载 floating-window.html）
-    const contentFrame = document.createElement('iframe');
-    const floatingWindowUrl = chrome.runtime.getURL('floating-window.html');
-    console.log('Floating window URL:', floatingWindowUrl);
-    contentFrame.src = floatingWindowUrl;
-    contentFrame.style.cssText = `
-      flex: 1;
-      border: none;
-      width: 100%;
-      height: 480px;
-      min-height: 320px;
-      max-height: 80vh;
-    `;
-    
-    // 监听 iframe 加载错误
-    contentFrame.addEventListener('error', (e) => {
-      console.error('Iframe loading error:', e);
-    });
-    
-    contentFrame.addEventListener('load', () => {
-      console.log('Iframe loaded successfully');
-    });
-    
-    floatingPanel.appendChild(header);
-    floatingPanel.appendChild(contentFrame);
-    document.body.appendChild(floatingPanel);
-    
-    // 应用宽度状态函数
-    function applyWidthState(widthState) {
-      if (!floatingPanel) return;
-      
-      const screenWidth = window.innerWidth;
-      let newWidth;
-      
-      if (widthState === 'half') {
-        newWidth = Math.min(screenWidth * 0.5, 600);
-      } else if (widthState === 'third') {
-        newWidth = Math.min(screenWidth * 0.333, 400);
-      } else {
-        newWidth = 320; // 默认宽度
-      }
-      
-      floatingPanel.style.width = newWidth + 'px';
-    }
-    
-    // 拖拽功能
-    header.addEventListener('mousedown', (e) => {
-      if (e.target === engineSelect || e.target === widthBtn || e.target === closeBtn || 
-          e.target.closest('select') || e.target.closest('button')) {
-        return;
-      }
-      
-      isPanelDragging = true;
-      const rect = floatingPanel.getBoundingClientRect();
-      panelDragOffset.x = e.clientX - rect.left;
-      panelDragOffset.y = e.clientY - rect.top;
-      header.style.cursor = 'grabbing';
-      e.preventDefault();
-    });
-    
-    document.addEventListener('mousemove', (e) => {
-      if (!isPanelDragging || !floatingPanel) return;
-      
-      const newX = e.clientX - panelDragOffset.x;
-      const newY = e.clientY - panelDragOffset.y;
-      
-      // 边界检查
-      const rect = floatingPanel.getBoundingClientRect();
-      const maxX = window.innerWidth - rect.width;
-      const maxY = window.innerHeight - rect.height;
-      
-      floatingPanel.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
-      floatingPanel.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
-      floatingPanel.style.right = 'auto';
-      floatingPanel.style.bottom = 'auto';
-    });
-    
-    document.addEventListener('mouseup', () => {
-      if (isPanelDragging && floatingPanel) {
-        const rect = floatingPanel.getBoundingClientRect();
-        chrome.storage.local.set({
-          panelX: rect.left,
-          panelY: rect.top,
-          isDragging: false
-        });
-      }
-      isPanelDragging = false;
-      if (header) header.style.cursor = 'grab';
-    });
-    
-    // 监听宽度变化消息
-    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-      if (msg.type === 'jt_width_changed' && floatingPanel) {
-        applyWidthState(msg.widthState);
-      }
-      sendResponse({});
-    });
-  }
-  
-  // 监听打开悬浮窗的消息
+  // 监听来自 background 的打开消息
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    console.log('Content script received message:', msg);
-    if (msg.type === 'jt_open_floating_panel') {
-      console.log('Creating floating panel...');
-      createFloatingPanel();
-      console.log('Floating panel created');
-      sendResponse({ success: true });
-    }
-    return true;
-  });
-  
-  // 页面加载时检查是否应该打开悬浮窗
-  chrome.storage.local.get(['floatingPanelOpen'], (res) => {
-    if (res.floatingPanelOpen) {
-      // 延迟创建，确保页面已加载
-      setTimeout(createFloatingPanel, 500);
+    if (msg.type === 'jt_toggle_floating_window') {
+      toggleFloatingWindow();
     }
   });
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
+  // 辅助函数：调整页面内容宽度（挤压效果）
+  function adjustPageContent(width) {
+    document.body.style.transition = 'width 0.1s linear';
+    document.body.style.width = `calc(100% - ${width})`;
+    document.body.style.marginRight = width;
+  }
+
+  function resetPageContent() {
+    document.body.style.width = '';
+    document.body.style.marginRight = '';
+    document.body.style.transition = '';
+  }
+
+  // 创建/切换悬浮窗
+    let floatingContainer = null;
+    function toggleFloatingWindow() {
+      // 检查页面上是否已经存在悬浮窗（防止多开）
+      // 检查 Shadow DOM 宿主
+      const existingHost = document.getElementById('jt-floating-host');
+      // 检查旧的 ID（兼容性清理）
+      const existingContainer = document.getElementById('jt-floating-container');
+      
+      if (existingHost) {
+        if (existingHost.style.display === 'none') {
+          existingHost.style.display = 'flex';
+          // 重新触发一次宽度调整，确保页面被挤压
+          adjustPageContent(existingHost.style.width || '400px');
+        } else {
+          existingHost.style.display = 'none';
+          resetPageContent();
+        }
+        return;
+      }
+      
+      // 如果存在旧的容器，先移除（清理旧代码产生的残留）
+      if (existingContainer) {
+        existingContainer.remove();
+      }
+  
+      // 使用 Shadow DOM 封装
+    const shadowHost = document.createElement('div');
+    shadowHost.id = 'jt-floating-host';
+    Object.assign(shadowHost.style, {
+      position: 'fixed',
+      top: '0',
+      right: '0',
+      width: '360px', // 改回 360px
+      height: '100vh',
+      maxHeight: '100vh',
+      zIndex: '2147483647',
+      // borderRadius: '12px', // 不需要圆角了
+      // boxShadow: '0 4px 12px rgba(0,0,0,0.15)', // 去掉投影
+      borderLeft: '1px solid #e5e7eb', // 加个左边框区分页面
+      backgroundColor: '#fff',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    });
+
+    const shadow = shadowHost.attachShadow({ mode: 'open' });
+
+    // 注入全局样式重置，防止页面样式污染
+    const style = document.createElement('style');
+    style.textContent = `
+      :host {
+        all: initial; /* 重置所有继承样式 */
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      iframe {
+        flex: 1;
+        border: none;
+        width: 100%;
+        height: 100%;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #fff;
+        flex-shrink: 0;
+        cursor: default;
+        user-select: none;
+      }
+      .header:active {
+        cursor: default;
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #374151;
+        flex: 1; /* 让左侧占据剩余空间 */
+        min-width: 0; /* 防止挤压 */
+      }
+      .header-right {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0; /* 保持右侧按钮不收缩 */
+      }
+      button {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+        border-radius: 4px;
+      }
+      button:hover {
+        background-color: #f3f4f6;
+        color: #111827;
+      }
+    `;
+    shadow.appendChild(style);
+
+    // 创建 Header
+    const header = document.createElement('div');
+    header.className = 'header';
+    header.innerHTML = `
+      <div class="header-left">
+        <!-- 移除拖拽图标 -->
+        <span style="display:flex;align-items:center;">
+          <img src="${chrome.runtime.getURL('icons/logo_extension.png')}" style="height:20px;width:auto;" alt="">
+        </span>
+      </div>
+      <div class="header-right">
+        <!-- 引擎选择下拉框 (复用语言选择样式) -->
+        <div class="engine-dropdown" style="position:relative; margin-right: 8px;">
+          <div id="engine-trigger" style="
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            background: #f3f4f6; /* 复用语言选择框背景色 */
+            transition: background 0.2s;
+          ">
+            <span id="current-engine-label" style="font-weight:400;">Google</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:#9ca3af;"><path d="M6 9L12 15L18 9"/></svg>
+          </div>
+          
+          <!-- 下拉菜单 -->
+          <div id="engine-menu" style="
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(16,24,40,.12); /* 修复阴影 */
+            min-width: 140px;
+            z-index: 50;
+            padding: 8px; /* 内边距 */
+            overflow: hidden;
+          ">
+            <!-- 移除 "翻译引擎" 标题 -->
+            <div class="engine-option" data-value="google" style="padding: 10px 12px; cursor: pointer; font-size: 14px; color: #6b7280; display: flex; align-items: center; justify-content: space-between; border-radius: 8px; line-height: 1; transition: background 0.1s;">
+              <span>谷歌翻译</span>
+              <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0395FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="engine-option" data-value="ai" style="padding: 10px 12px; cursor: pointer; font-size: 14px; color: #6b7280; display: flex; align-items: center; justify-content: space-between; border-radius: 8px; line-height: 1; transition: background 0.1s;">
+              <span>AI智能翻译</span>
+              <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0395FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 宽度调整按钮 -->
+        <button id="width-btn" title="切换宽度" style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 6px 12px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 13px;
+          color: #374151;
+          background: transparent;
+          border: none;
+          min-width: 48px;
+          font-weight: 500;
+        ">
+          <!-- 初始内容由 JS 动态设置 -->
+        </button>
+        <button id="close-btn" title="关闭">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    `;
+    shadow.appendChild(header);
+
+    // 创建 Iframe
+    const iframe = document.createElement('iframe');
+    iframe.src = chrome.runtime.getURL('popup.html');
+    shadow.appendChild(iframe);
+
+    // 创建拖拽调整宽度的把手 (Resizer)
+    const resizer = document.createElement('div');
+    resizer.id = 'jt-resizer';
+    resizer.style.cssText = `
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      cursor: col-resize;
+      background: transparent;
+      z-index: 10;
+    `;
+    // 鼠标悬停时显示把手，或者一直透明，只要能抓到就行
+    resizer.onmouseenter = () => resizer.style.background = 'rgba(0,0,0,0.05)';
+    resizer.onmouseleave = () => resizer.style.background = 'transparent';
+    shadow.appendChild(resizer);
+
+    // 状态管理：宽度模式
+    let widthMode = 'default'; // default(360px) -> half(50%) -> third(30%)
+
+    // 辅助函数：调整页面内容宽度（挤压效果）
+    function adjustPageContent(width) {
+      document.body.style.transition = 'width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)'; // 更慢更自然
+      document.body.style.width = `calc(100% - ${width})`;
+      document.body.style.marginRight = width;
+    }
+
+    function resetPageContent() {
+      document.body.style.width = '';
+      document.body.style.marginRight = '';
+      document.body.style.transition = 'width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
+    }
+
+    // 更新宽度按钮提示文字
+    function updateWidthBtnTitle(mode) {
+      const btn = header.querySelector('#width-btn');
+      let text = '默认';
+      
+      if (mode === 'half') text = '50%';
+      if (mode === 'third') text = '30%';
+      if (mode === 'default') text = '默认';
+      
+      btn.textContent = text;
+      
+      // 样式调整：鼠标悬停时显示背景
+      btn.onmouseenter = () => btn.style.background = '#f3f4f6';
+      btn.onmouseleave = () => btn.style.background = 'transparent';
+    }
+
+
+    // 绑定事件
+    // 引擎切换 (自定义下拉菜单逻辑)
+    const engineTrigger = header.querySelector('#engine-trigger');
+    const engineMenu = header.querySelector('#engine-menu');
+    const currentLabel = header.querySelector('#current-engine-label');
+    const engineOptions = header.querySelectorAll('.engine-option');
+    let isMenuOpen = false;
+
+    // 初始化引擎状态
+    chrome.storage.sync.get(['engine'], (res) => {
+      const current = res.engine || 'google';
+      updateEngineUI(current);
+    });
+
+    function updateEngineUI(value) {
+      // 更新 Trigger 文本
+      const labelMap = { 'google': '谷歌翻译', 'ai': 'AI智能翻译' };
+      currentLabel.textContent = labelMap[value] || '谷歌翻译';
+      
+      // 更新选项选中状态
+      engineOptions.forEach(opt => {
+        const check = opt.querySelector('.check-icon');
+        // 隐藏对勾图标
+        if (check) check.style.display = 'none';
+        
+        if (opt.dataset.value === value) {
+          // 选中项样式
+          opt.style.background = '#edf6ff';
+          opt.style.color = '#0395FF';
+        } else {
+          // 未选中项样式
+          opt.style.background = 'transparent';
+          opt.style.color = '#374151';
+        }
+        
+        // 绑定悬浮效果 (JS实现更灵活)
+        opt.onmouseenter = () => {
+          if (opt.dataset.value !== value) {
+            opt.style.background = '#F5F6F8';
+          }
+        };
+        opt.onmouseleave = () => {
+          if (opt.dataset.value !== value) {
+            opt.style.background = 'transparent';
+          }
+        };
+      });
+    }
+
+    // 切换菜单显示
+    engineTrigger.onclick = (e) => {
+      e.stopPropagation();
+      isMenuOpen = !isMenuOpen;
+      engineMenu.style.display = isMenuOpen ? 'block' : 'none';
+      // 点击展开时不需要变背景色，保持 f3f4f6
+      // engineTrigger.style.background = isMenuOpen ? '#f3f4f6' : 'transparent';
+    };
+
+    // 点击选项
+    engineOptions.forEach(opt => {
+      opt.onclick = (e) => {
+        e.stopPropagation();
+        const value = opt.dataset.value;
+        chrome.storage.sync.set({ engine: value });
+        updateEngineUI(value);
+        isMenuOpen = false;
+        engineMenu.style.display = 'none';
+        // engineTrigger.style.background = 'transparent';
+      };
+    });
+
+    // 点击外部关闭菜单
+    document.addEventListener('click', () => {
+      if (isMenuOpen) {
+        isMenuOpen = false;
+        engineMenu.style.display = 'none';
+        // engineTrigger.style.background = 'transparent';
+      }
+    });
+
+    // 监听来自 popup 的消息（如粘贴请求）
+    window.addEventListener('message', async (event) => {
+      // 验证来源安全
+      // 注意：由于是扩展内部 iframe，origin 可能是 chrome-extension://...
+      if (event.data.type === 'jt_paste_request') {
+        try {
+          // 读取剪贴板文本
+          const text = await navigator.clipboard.readText();
+          // 发回给 iframe
+          iframe.contentWindow.postMessage({
+            type: 'jt_paste_response',
+            text: text
+          }, '*');
+        } catch (err) {
+          console.error('Failed to read clipboard:', err);
+          // 尝试使用 execCommand 降级方案
+          try {
+            const textArea = document.createElement("textarea");
+            document.body.appendChild(textArea);
+            textArea.focus();
+            document.execCommand('paste');
+            const text = textArea.value;
+            document.body.removeChild(textArea);
+            if (text) {
+              iframe.contentWindow.postMessage({
+                type: 'jt_paste_response',
+                text: text
+              }, '*');
+            }
+          } catch (e) {
+             console.error('Fallback paste failed:', e);
+          }
+        }
+      }
+    });
+
+    // 关闭
+    header.querySelector('#close-btn').onclick = (e) => {
+      e.stopPropagation();
+      shadowHost.style.display = 'none';
+      resetPageContent(); 
+    };
+
+    // 宽度切换按钮（保留作为快捷方式）
+    header.querySelector('#width-btn').onclick = (e) => {
+      e.stopPropagation();
+      const currentWidth = shadowHost.offsetWidth;
+      let newWidth;
+      
+      if (widthMode === 'default') {
+        widthMode = 'half';
+        newWidth = '50%';
+      } else if (widthMode === 'half') {
+        widthMode = 'third';
+        newWidth = '30%';
+      } else {
+        widthMode = 'default';
+        newWidth = '360px';
+      }
+      
+      shadowHost.style.width = newWidth;
+      adjustPageContent(newWidth);
+      updateWidthBtnTitle(widthMode);
+    };
+
+    // 拖拽调整宽度逻辑
+    resizer.onmousedown = (e) => {
+      e.preventDefault();
+      document.body.style.transition = 'none'; // 拖拽时禁用过渡动画，防止卡顿
+      shadowHost.style.transition = 'none';
+      iframe.style.pointerEvents = 'none'; // 关键修复：禁用iframe事件，防止拖拽卡顿或失效
+      
+      const startX = e.clientX;
+      const startWidth = shadowHost.offsetWidth;
+      
+      const onMouseMove = (ev) => {
+        // 计算新宽度：因为是右侧面板，向左拖动（ev.clientX 变小）宽度增加
+        const deltaX = startX - ev.clientX;
+        let newWidth = startWidth + deltaX;
+        
+        // 限制最小最大宽度
+        if (newWidth < 300) newWidth = 300;
+        if (newWidth > window.innerWidth - 100) newWidth = window.innerWidth - 100;
+        
+        const widthStr = newWidth + 'px';
+        shadowHost.style.width = widthStr;
+        document.body.style.width = `calc(100% - ${widthStr})`;
+        document.body.style.marginRight = widthStr;
+      };
+      
+      const onMouseUp = () => {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        iframe.style.pointerEvents = ''; // 恢复iframe事件
+        // 恢复过渡动画（可选）
+        // document.body.style.transition = 'width 0.3s ease';
+      };
+      
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    };
+    
+    // 初始化时也执行一次挤压
+    adjustPageContent('360px');
+    
+    // 初始化宽度按钮标题
+    updateWidthBtnTitle('default');
+
+    document.body.appendChild(shadowHost);
+    floatingContainer = shadowHost; // 更新引用
   }
 })();

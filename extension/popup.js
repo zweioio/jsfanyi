@@ -11,9 +11,12 @@ const state = {
 
 // DOM 元素
 const els = {
-  fromLang: document.getElementById('fromLang'),
-  toLang: document.getElementById('toLang'),
-  swapBtn: document.getElementById('swapBtn'),
+  // Global Language Selector
+  sourceLangSelect: document.getElementById('sourceLangSelect'),
+  targetLangSelect: document.getElementById('targetLangSelect'),
+  swapLangBtn: document.getElementById('swapLangBtn'),
+  
+  // Text Mode Elements
   inputText: document.getElementById('inputText'),
   placeholderLayer: document.getElementById('placeholderLayer'),
   pasteBtn: document.getElementById('pasteBtnReal'),
@@ -25,14 +28,8 @@ const els = {
   speakBtn: document.getElementById('speakBtn'),
   copyBtn: document.getElementById('copyBtn'),
   clearOutput: document.getElementById('clearOutput'),
-  // Web Mode Elements
-  webFromLang: document.getElementById('webFromLang'),
-  webToLang: document.getElementById('webToLang'),
-  webSwapBtn: document.getElementById('webSwapBtn'),
-  // Contrast Mode Elements (New)
-  contrastFromLang: document.getElementById('contrastFromLang'),
-  contrastToLang: document.getElementById('contrastToLang'),
-  contrastSwapBtn: document.getElementById('contrastSwapBtn'),
+  
+  // Other Elements
   quickTransResult: document.getElementById('quickTransResult')
 };
 
@@ -149,15 +146,11 @@ async function handleQuickTranslation(text) {
 async function loadSettings() {
   const settings = await chrome.storage.local.get(['fromLang', 'toLang']);
   if (settings.fromLang) {
-    els.fromLang.value = settings.fromLang;
-    if (els.webFromLang) els.webFromLang.value = settings.fromLang;
-    if (els.contrastFromLang) els.contrastFromLang.value = settings.fromLang;
+    els.sourceLangSelect.value = settings.fromLang;
     state.fromLang = settings.fromLang;
   }
   if (settings.toLang) {
-    els.toLang.value = settings.toLang;
-    if (els.webToLang) els.webToLang.value = settings.toLang;
-    if (els.contrastToLang) els.contrastToLang.value = settings.toLang;
+    els.targetLangSelect.value = settings.toLang;
     state.toLang = settings.toLang;
   }
   syncLangLabels();
@@ -165,88 +158,65 @@ async function loadSettings() {
 
 // 绑定事件
 function attachEvents() {
-  // --- 文本模式语言切换 ---
-  els.fromLang.addEventListener('change', (e) => {
+  // --- 全局语言切换 ---
+  els.sourceLangSelect.addEventListener('change', (e) => {
     handleLangChange('from', e.target.value);
   });
   
-  els.toLang.addEventListener('change', (e) => {
+  els.targetLangSelect.addEventListener('change', (e) => {
     handleLangChange('to', e.target.value);
   });
-
-  // --- Web模式语言切换 (同步) ---
-  if (els.webFromLang) {
-    els.webFromLang.addEventListener('change', (e) => {
-      handleLangChange('from', e.target.value);
-    });
-  }
-  if (els.webToLang) {
-    els.webToLang.addEventListener('change', (e) => {
-      handleLangChange('to', e.target.value);
-    });
-  }
-
-  // --- 对比模式语言切换 (同步) ---
-  if (els.contrastFromLang) {
-    els.contrastFromLang.addEventListener('change', (e) => {
-      handleLangChange('from', e.target.value);
-    });
-  }
-  if (els.contrastToLang) {
-    els.contrastToLang.addEventListener('change', (e) => {
-      handleLangChange('to', e.target.value);
-    });
-  }
 
   // 统一处理语言变更
   function handleLangChange(type, value) {
     if (type === 'from') {
       state.fromLang = value;
-      els.fromLang.value = value;
-      if (els.webFromLang) els.webFromLang.value = value;
-      if (els.contrastFromLang) els.contrastFromLang.value = value;
+      els.sourceLangSelect.value = value;
       
       // 互斥逻辑
       if (state.fromLang === state.toLang) {
         state.toLang = state.fromLang === 'zh' ? 'en' : 'zh';
-        els.toLang.value = state.toLang;
-        if (els.webToLang) els.webToLang.value = state.toLang;
-        if (els.contrastToLang) els.contrastToLang.value = state.toLang;
+        els.targetLangSelect.value = state.toLang;
       }
     } else {
       state.toLang = value;
-      els.toLang.value = value;
-      if (els.webToLang) els.webToLang.value = value;
-      if (els.contrastToLang) els.contrastToLang.value = value;
+      els.targetLangSelect.value = value;
       
       // 互斥逻辑
       if (state.toLang === state.fromLang) {
         state.fromLang = state.toLang === 'zh' ? 'en' : 'zh';
-        els.fromLang.value = state.fromLang;
-        if (els.webFromLang) els.webFromLang.value = state.fromLang;
-        if (els.contrastFromLang) els.contrastFromLang.value = state.fromLang;
+        els.sourceLangSelect.value = state.fromLang;
       }
     }
     syncLangLabels();
     chrome.storage.local.set({ fromLang: state.fromLang, toLang: state.toLang });
+    
+    // 如果当前在文本翻译 Tab 且有输入，触发重译
+    const activeTab = document.querySelector('.mode-tab.active')?.dataset.tab;
+    if (activeTab === 'text' && els.inputText.value.trim()) {
+      performTranslation();
+    }
   }
 
-  // 互换语言 (文本模式)
-  els.swapBtn.addEventListener('click', swapLangs);
-  // 互换语言 (Web模式)
-  if (els.webSwapBtn) {
-    els.webSwapBtn.addEventListener('click', swapLangs);
-  }
-  // 互换语言 (对比模式)
-  if (els.contrastSwapBtn) {
-    els.contrastSwapBtn.addEventListener('click', swapLangs);
-  }
+  // 互换语言
+  els.swapLangBtn.addEventListener('click', swapLangs);
 
   function swapLangs() {
     const newFrom = state.toLang;
     const newTo = state.fromLang;
-    handleLangChange('from', newFrom);
-    handleLangChange('to', newTo); // This is redundant but safe, logic handles sync
+    // 直接更新状态并保存，避免两次触发 change
+    state.fromLang = newFrom;
+    state.toLang = newTo;
+    els.sourceLangSelect.value = newFrom;
+    els.targetLangSelect.value = newTo;
+    syncLangLabels();
+    chrome.storage.local.set({ fromLang: state.fromLang, toLang: state.toLang });
+    
+    // 如果当前在文本翻译 Tab 且有输入，触发重译
+    const activeTab = document.querySelector('.mode-tab.active')?.dataset.tab;
+    if (activeTab === 'text' && els.inputText.value.trim()) {
+      performTranslation();
+    }
   }
 
   // 输入监听
@@ -268,15 +238,26 @@ function attachEvents() {
     els.inputText.style.overflowY = scrollHeight > 240 ? 'auto' : 'hidden';
   });
 
-  // 粘贴功能
-  els.pasteBtn.addEventListener('click', async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (text) {
-        setInputAndTranslate(text);
+  // 粘贴按钮逻辑
+  const pasteBtnReal = document.getElementById('pasteBtnReal');
+  if (pasteBtnReal) {
+    pasteBtnReal.addEventListener('click', async () => {
+      // 向父页面 (content script) 请求粘贴，因为 iframe 可能没有剪贴板权限
+      window.parent.postMessage({ type: 'jt_paste_request' }, '*');
+    });
+  }
+
+  // 监听来自父页面的粘贴响应
+  window.addEventListener('message', (event) => {
+    if (event.data.type === 'jt_paste_response' && event.data.text) {
+      const inputText = document.getElementById('inputText');
+      if (inputText) {
+        inputText.value = event.data.text;
+        // 触发 input 事件以更新状态
+        inputText.dispatchEvent(new Event('input'));
+        // 自动聚焦
+        inputText.focus();
       }
-    } catch (err) {
-      console.error('Failed to read clipboard:', err);
     }
   });
 
@@ -334,7 +315,7 @@ function attachEvents() {
     if (!text || text === '翻译结果将在这里展示') return;
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = els.toLang.value === 'zh' ? 'zh-CN' : 'en-US';
+    utterance.lang = els.targetLangSelect.value === 'zh' ? 'zh-CN' : 'en-US';
     
     utterance.onstart = () => {
       els.speakBtn.innerHTML = stopIcon;
@@ -376,20 +357,22 @@ function maybeAdjustLangByInput(text) {
   const detected = detectLang(text);
   if (!detected) return;
   if (detected === 'zh') {
-    if (els.fromLang.value !== 'zh' || els.toLang.value === 'zh') {
-      els.fromLang.value = 'zh';
-      els.toLang.value = 'en';
+    if (els.sourceLangSelect.value !== 'zh' || els.targetLangSelect.value === 'zh') {
+      els.sourceLangSelect.value = 'zh';
+      els.targetLangSelect.value = 'en';
       state.fromLang = 'zh';
       state.toLang = 'en';
       chrome.storage.local.set({ fromLang: state.fromLang, toLang: state.toLang });
+      syncLangLabels();
     }
   } else if (detected === 'en') {
-    if (els.fromLang.value !== 'en' || els.toLang.value === 'en') {
-      els.fromLang.value = 'en';
-      els.toLang.value = 'zh';
+    if (els.sourceLangSelect.value !== 'en' || els.targetLangSelect.value === 'en') {
+      els.sourceLangSelect.value = 'en';
+      els.targetLangSelect.value = 'zh';
       state.fromLang = 'en';
       state.toLang = 'zh';
       chrome.storage.local.set({ fromLang: state.fromLang, toLang: state.toLang });
+      syncLangLabels();
     }
   }
 }
@@ -499,7 +482,7 @@ async function performTranslation() {
 
   try {
     // 1. 主翻译
-    const mainResult = await fetchTranslate(currentText, els.fromLang.value, els.toLang.value);
+    const mainResult = await fetchTranslate(currentText, els.sourceLangSelect.value, els.targetLangSelect.value);
     
     // 检查：如果在请求期间输入框被清空了，则不再渲染结果
     if (!els.inputText.value.trim()) return;
@@ -510,7 +493,7 @@ async function performTranslation() {
     els.outputActions.classList.remove('hidden');
 
     // 3. 执行回译 (Back Translation) - 用来核对意思是否正确
-    const backFrom = els.toLang.value;
+    const backFrom = els.targetLangSelect.value;
     const backTo = (backFrom === 'zh' || backFrom === 'zh-CN') ? 'en' : 'zh';
     
     const backResult = await fetchTranslate(mainResult, backFrom, backTo);
@@ -523,8 +506,8 @@ async function performTranslation() {
 
     await addHistory({
       t: Date.now(),
-      from: els.fromLang.value,
-      to: els.toLang.value,
+      from: els.sourceLangSelect.value,
+      to: els.targetLangSelect.value,
       src: currentText,
       out: mainResult
     });
@@ -547,9 +530,12 @@ async function performTranslation() {
 // 统一翻译接口
 async function fetchTranslate(text, from, to) {
   try {
+    const engineSelect = document.getElementById('engineSelect');
+    const engine = engineSelect ? engineSelect.value : state.currentEngine;
+
     const res = await chrome.runtime.sendMessage({
       type: 'jt_translate_text',
-      engine: state.currentEngine, // 'google' or 'ai'
+      engine: engine, // 'google' or 'ai'
       from,
       to,
       text
@@ -573,59 +559,39 @@ init();
 
 // ===== 自定义门户式下拉（视觉样式） =====
 function syncLangLabels() {
-  const map = { zh: '中文（简体）', en: '英文' };
-  const fromLabel = document.getElementById('fromLabel');
-  const toLabel = document.getElementById('toLabel');
-  if (fromLabel) fromLabel.textContent = map[els.fromLang.value] || '中文（简体）';
-  if (toLabel) toLabel.textContent = map[els.toLang.value] || '中文（简体）';
-  
-  // Web模式标签同步
-  const webFromLabel = document.getElementById('webFromLabel');
-  const webToLabel = document.getElementById('webToLabel');
-  if (webFromLabel && els.webFromLang) webFromLabel.textContent = map[els.webFromLang.value] || '中文（简体）';
-  if (webToLabel && els.webToLang) webToLabel.textContent = map[els.webToLang.value] || '中文（简体）';
-
-  // Contrast模式标签同步
-  const contrastFromLabel = document.getElementById('contrastFromLabel');
-  const contrastToLabel = document.getElementById('contrastToLabel');
-  if (contrastFromLabel && els.contrastFromLang) contrastFromLabel.textContent = map[els.contrastFromLang.value] || '中文（简体）';
-  if (contrastToLabel && els.contrastToLang) contrastToLabel.textContent = map[els.contrastToLang.value] || '中文（简体）';
+  const map = {
+    zh: '中文（简体）',
+    en: '英语',
+    ja: '日语',
+    ko: '韩语',
+    fr: '法语',
+    de: '德语',
+    es: '西班牙语',
+    ru: '俄语',
+    ar: '阿拉伯语',
+    pt: '葡萄牙语',
+    it: '意大利语',
+    nl: '荷兰语',
+    th: '泰语',
+    vi: '越南语',
+    id: '印尼语'
+  };
+  const fromLabel = document.getElementById('sourceLangLabel');
+  const toLabel = document.getElementById('targetLangLabel');
+  if (fromLabel) fromLabel.textContent = map[els.sourceLangSelect.value] || '中文（简体）';
+  if (toLabel) toLabel.textContent = map[els.targetLangSelect.value] || '中文（简体）';
 }
 
 function setupLangDropdowns() {
-  const fromBox = document.getElementById('fromBox');
-  const toBox = document.getElementById('toBox');
-  fromBox && fromBox.addEventListener('click', (e) => {
+  const sourceLangBox = document.getElementById('sourceLangBox');
+  const targetLangBox = document.getElementById('targetLangBox');
+  sourceLangBox && sourceLangBox.addEventListener('click', (e) => {
     e.stopPropagation();
-    openPortalDropdown('from', fromBox);
+    openPortalDropdown('source', sourceLangBox);
   });
-  toBox && toBox.addEventListener('click', (e) => {
+  targetLangBox && targetLangBox.addEventListener('click', (e) => {
     e.stopPropagation();
-    openPortalDropdown('to', toBox);
-  });
-  
-  // Web模式下拉
-  const webFromBox = document.getElementById('webFromBox');
-  const webToBox = document.getElementById('webToBox');
-  webFromBox && webFromBox.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openPortalDropdown('webFrom', webFromBox);
-  });
-  webToBox && webToBox.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openPortalDropdown('webTo', webToBox);
-  });
-
-  // Contrast模式下拉
-  const contrastFromBox = document.getElementById('contrastFromBox');
-  const contrastToBox = document.getElementById('contrastToBox');
-  contrastFromBox && contrastFromBox.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openPortalDropdown('contrastFrom', contrastFromBox);
-  });
-  contrastToBox && contrastToBox.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openPortalDropdown('contrastTo', contrastToBox);
+    openPortalDropdown('target', targetLangBox);
   });
 }
 
@@ -641,29 +607,30 @@ function openPortalDropdown(which, anchorEl) {
   panel.style.width = `${rect.width}px`;
   const options = [
     { value: 'zh', label: '中文（简体）' },
-    { value: 'en', label: '英文' }
+    { value: 'en', label: '英语' },
+    { value: 'ja', label: '日语' },
+    { value: 'ko', label: '韩语' },
+    { value: 'fr', label: '法语' },
+    { value: 'de', label: '德语' },
+    { value: 'es', label: '西班牙语' },
+    { value: 'ru', label: '俄语' },
+    { value: 'ar', label: '阿拉伯语' },
+    { value: 'pt', label: '葡萄牙语' },
+    { value: 'it', label: '意大利语' },
+    { value: 'nl', label: '荷兰语' },
+    { value: 'th', label: '泰语' },
+    { value: 'vi', label: '越南语' },
+    { value: 'id', label: '印尼语' }
   ];
   
   // Determine current value and select element based on 'which'
   let currentVal, selectEl;
-  if (which === 'from') {
-    currentVal = els.fromLang.value;
-    selectEl = els.fromLang;
-  } else if (which === 'to') {
-    currentVal = els.toLang.value;
-    selectEl = els.toLang;
-  } else if (which === 'webFrom') {
-    currentVal = els.webFromLang.value;
-    selectEl = els.webFromLang;
-  } else if (which === 'webTo') {
-    currentVal = els.webToLang.value;
-    selectEl = els.webToLang;
-  } else if (which === 'contrastFrom') {
-    currentVal = els.contrastFromLang.value;
-    selectEl = els.contrastFromLang;
-  } else if (which === 'contrastTo') {
-    currentVal = els.contrastToLang.value;
-    selectEl = els.contrastToLang;
+  if (which === 'source') {
+    currentVal = els.sourceLangSelect.value;
+    selectEl = els.sourceLangSelect;
+  } else if (which === 'target') {
+    currentVal = els.targetLangSelect.value;
+    selectEl = els.targetLangSelect;
   }
 
   options.forEach(opt => {
@@ -707,139 +674,17 @@ function closePortalDropdown() {
   }
 }
 
-// ===================================
-// 新增功能：拖拽和宽度调整
-// ===================================
-
-// 宽度状态管理
-const widthStates = ['default', 'half', 'third'];
-let currentWidthState = 0;
-
-// 初始化拖拽功能
-function initDragFeature() {
-  const dragHandle = document.getElementById('dragHandle');
-  const widthAdjustBtn = document.getElementById('widthAdjustBtn');
-  
-  if (!dragHandle || !widthAdjustBtn) return;
-  
-  // 拖拽功能
-  let isDragging = false;
-  let startX, startY, startLeft, startTop;
-  
-  dragHandle.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    
-    // 获取当前 popup 的位置
-    const popup = document.body;
-    const rect = popup.getBoundingClientRect();
-    startLeft = rect.left;
-    startTop = rect.top;
-    
-    dragHandle.style.cursor = 'grabbing';
-    e.preventDefault();
-  });
-  
-  document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    
-    const deltaX = e.clientX - startX;
-    const deltaY = e.clientY - startY;
-    
-    // 注意：popup 的位置是由浏览器控制的，我们无法直接移动它
-    // 这里我们只是保存偏移量，用于悬浮窗模式
-    chrome.storage.local.set({
-      dragDeltaX: deltaX,
-      dragDeltaY: deltaY,
-      isDragging: true
-    });
-  });
-  
-  document.addEventListener('mouseup', () => {
-    if (isDragging) {
-      isDragging = false;
-      dragHandle.style.cursor = 'grab';
-      
-      // 重置拖拽状态
-      setTimeout(() => {
-        chrome.storage.local.set({ isDragging: false });
-      }, 100);
-    }
-  });
-  
-  // 宽度调整功能
-  widthAdjustBtn.addEventListener('click', () => {
-    currentWidthState = (currentWidthState + 1) % widthStates.length;
-    const newWidthState = widthStates[currentWidthState];
-    
-    // 保存宽度状态
-    chrome.storage.local.set({ widthState: newWidthState });
-    
-    // 更新 UI
-    updateWidthUI(newWidthState);
-    
-    // 通知 background 和 content script
-    chrome.runtime.sendMessage({ 
-      type: 'jt_width_changed', 
-      widthState: newWidthState 
-    }).catch(() => {});
-  });
-  
-  // 加载保存的宽度状态
-  chrome.storage.local.get(['widthState'], (res) => {
-    if (res.widthState) {
-      currentWidthState = widthStates.indexOf(res.widthState);
-      if (currentWidthState === -1) currentWidthState = 0;
-      updateWidthUI(res.widthState);
-    }
-  });
-}
-
-// 更新宽度 UI
-function updateWidthUI(widthState) {
-  const widthAdjustBtn = document.getElementById('widthAdjustBtn');
-  if (!widthAdjustBtn) return;
-  
-  // 根据宽度状态改变图标
-  const svg = widthAdjustBtn.querySelector('svg');
-  if (!svg) return;
-  
-  if (widthState === 'half') {
-    // 50% 宽度图标
-    svg.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 14h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/><line x1="12" y1="3" x2="12" y2="21"/><text x="12" y="28" text-anchor="middle" font-size="8" fill="currentColor">50%</text>';
-    widthAdjustBtn.title = '宽度：50%（点击切换为 33%）';
-  } else if (widthState === 'third') {
-    // 33% 宽度图标
-    svg.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 14h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/><line x1="12" y1="3" x2="12" y2="21"/><text x="12" y="28" text-anchor="middle" font-size="8" fill="currentColor">33%</text>';
-    widthAdjustBtn.title = '宽度：33%（点击恢复默认）';
-  } else {
-    // 默认宽度图标
-    svg.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 14h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/><line x1="12" y1="3" x2="12" y2="21"/>';
-    widthAdjustBtn.title = '调整宽度（点击切换为 50%）';
-  }
-}
-
 // 引擎选择下拉框事件监听
 function initEngineSelect() {
-  const engineSelect = document.getElementById('engineSelect');
-  if (!engineSelect) return;
-  
-  // 加载保存的引擎设置
-  chrome.storage.sync.get(['engine'], (result) => {
-    if (result.engine) {
-      engineSelect.value = result.engine;
-      state.currentEngine = result.engine;
-    }
-  });
-  
-  engineSelect.addEventListener('change', (e) => {
-    state.currentEngine = e.target.value;
-    chrome.storage.sync.set({ engine: state.currentEngine });
-    
-    // 如果输入框有内容，切换引擎后重新翻译
-    if (els.inputText && els.inputText.value.trim()) {
-      performTranslation();
+  // 此功能已移至 content.js 中的自定义下拉框逻辑实现
+  // 仅保留状态同步，以便 popup 内部逻辑能获取最新引擎
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'sync' && changes.engine) {
+      state.currentEngine = changes.engine.newValue;
+      // 如果输入框有内容，切换引擎后重新翻译
+      if (els.inputText && els.inputText.value.trim()) {
+        performTranslation();
+      }
     }
   });
 }
@@ -847,6 +692,5 @@ function initEngineSelect() {
 // 在初始化时调用新功能
 window.addEventListener('DOMContentLoaded', () => {
   init();
-  initDragFeature();
   initEngineSelect();
 });

@@ -1,5 +1,29 @@
-// 移除侧边栏配置，使用 popup 模式
-// chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
+// 移除侧边栏配置，确保点击图标触发 action.onClicked
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false }).catch(() => {});
+
+// 监听扩展图标点击
+chrome.action.onClicked.addListener((tab) => {
+  if (tab.id) {
+    // 先尝试注入脚本（确保脚本存在），无论之前是否注入过
+    // 这比先发消息再捕获错误更稳健，因为注入操作是幂等的
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['content.js']
+    }).then(() => {
+      // 注入成功后发送消息
+      // 稍微延迟一下，确保 content script 的监听器已注册
+      setTimeout(() => {
+        chrome.tabs.sendMessage(tab.id, { type: 'jt_toggle_floating_window' })
+          .then(() => console.log('Message sent successfully'))
+          .catch(err => console.error('Message send failed:', err));
+      }, 100);
+    }).catch(err => {
+      console.error('Script injection failed:', err);
+      // 如果注入失败（例如在 chrome:// 页面），尝试直接发送（死马当活马医）
+      chrome.tabs.sendMessage(tab.id, { type: 'jt_toggle_floating_window' }).catch(() => {});
+    });
+  }
+});
 
 // Edge Token Cache
 let edgeToken = '';
@@ -162,25 +186,7 @@ async function fetchEdgeBatch(items, from, to) {
   return null;
 }
 
-// 监听扩展图标点击或快捷键，直接在网页上创建悬浮窗
-chrome.action.onClicked.addListener((tab) => {
-  console.log('Extension icon clicked, tab:', tab);
-  // 注入 content script（如果尚未注入）
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    files: ['content.js']
-  }, (results) => {
-    console.log('Script injected results:', results);
-    // 然后发送消息创建悬浮窗
-    setTimeout(() => {
-      chrome.tabs.sendMessage(tab.id, { type: 'jt_open_floating_panel' }).then((response) => {
-        console.log('Message sent successfully, response:', response);
-      }).catch((error) => {
-        console.error('Error sending message:', error);
-      });
-    }, 100);
-  });
-});
+
 
 // 消息监听
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -216,41 +222,5 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         });
       }
     });
-  }
-  
-  // 监听宽度变化消息，转发给 content script
-  if (msg && msg.type === 'jt_width_changed') {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0] && tabs[0].id) {
-        chrome.tabs.sendMessage(tabs[0].id, msg).catch(() => {});
-      }
-    });
-    sendResponse({});
-    return true;
-  }
-  
-  // 监听打开悬浮窗的消息
-  if (msg && msg.type === 'jt_open_floating_panel') {
-    // 保存悬浮窗打开状态
-    chrome.storage.local.set({ floatingPanelOpen: true });
-    
-    // 通知当前 tab 的 content script 创建悬浮窗
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0] && tabs[0].id) {
-        // 先确保 content script 已注入
-        chrome.scripting.executeScript({
-          target: { tabId: tabs[0].id },
-          files: ['content.js']
-        }).catch(() => {});
-        
-        // 然后发送消息
-        setTimeout(() => {
-          chrome.tabs.sendMessage(tabs[0].id, msg).catch(() => {});
-        }, 200);
-      }
-    });
-    
-    sendResponse({ success: true });
-    return true;
   }
 });
